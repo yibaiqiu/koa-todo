@@ -1,0 +1,29 @@
+{
+  "name": "todo",
+  "version": "0.1.0",
+  "description": "A simple todo web app built in koa, vue and bootstrap.",
+  "main": "app.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "node_modules/.bin/nodemon app.js",
+    "test": "test"
+  },
+  "keywords": [
+    "koa",
+    "vue",
+    "bootstrap",
+    "restful"
+  ],
+  "author": "Alex Qiu",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.2.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-router": "^7.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
