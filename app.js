@@ -2,6 +2,7 @@
 
 const Koa = require("koa");
 const Router = require("koa-router");
+const bodyParser = require("koa-bodyparser"); 
 
 const app = new Koa();
 const router = new Router();
@@ -49,8 +50,8 @@ router.get('/api/v1/tasks', async (ctx, next) => {
 //get tasks/task_id router
 router.get('/api/v1/tasks/:task_id', async (ctx, next) => {
     var task_id = ctx.params.task_id;
-    var result = '{"code":1001,"msg":"task_not_found"}';
-    var status = 404;
+    var result = '{"code":"task:task_not found","msg":"task not found"}';
+    var status = 400;
 
     ctx.response.type = 'application/json';
     for(var i in todolist.tasks){
@@ -64,6 +65,33 @@ router.get('/api/v1/tasks/:task_id', async (ctx, next) => {
     ctx.response.status = status;    
 });
 
+//post tasks (add new task)
+router.post('/api/v1/tasks', async (ctx, next) => {
+  var new_title = ctx.request.body.title || '';
+  console.log(`Add new task: title=${new_title}`);
+
+  ctx.response.type = 'application/json';
+
+  if('' === new_title){
+    //title is empty
+    ctx.response.status = 400;
+    ctx.response.body = '{"code":"task:title_is_empty","msg":"title must be not empty"}';
+  }else{
+    //简单实现，可能重复
+    var new_id = todolist.tasks.length +1;
+    var task = {
+      id: todolist.tasks.length +1,
+      title: new_title,
+      done: false
+    };
+    todolist.tasks.push(task);
+    ctx.response.status = 201;
+    ctx.response.body = task;
+  }
+});
+
+//在router之前引入bodyPaeser
+app.use(bodyParser());
 app.use(router.routes());
 app.use(router.allowedMethods());
 
