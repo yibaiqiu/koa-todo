@@ -4,6 +4,8 @@ const Koa = require("koa");
 const Router = require("koa-router");
 const bodyParser = require("koa-bodyparser"); 
 
+const HttpStatus = require('./utils/httpStatusCode');
+
 const app = new Koa();
 const router = new Router();
 
@@ -44,20 +46,20 @@ router.get('/', async (ctx, next) => {
 //get tasks router
 router.get('/api/v1/tasks', async (ctx, next) => {
   ctx.response.type = 'application/json';
-  ctx.response.body = JSON.stringify(todolist);
+  ctx.response.body = todolist;
 });
 
 //get tasks/task_id router
 router.get('/api/v1/tasks/:task_id', async (ctx, next) => {
     var task_id = ctx.params.task_id;
     var result = '{"code":"task:task_not found","msg":"task not found"}';
-    var status = 400;
+    var status = HttpStatus.BAD_REQUEST;
 
     ctx.response.type = 'application/json';
     for(var i in todolist.tasks){
         if(task_id === todolist.tasks[i].id.toString()){
-            result = JSON.stringify(todolist.tasks[i]);
-            status = 200;
+            result = todolist.tasks[i];
+            status = HttpStatus.OK;
             break;           
         }
     }
@@ -74,10 +76,9 @@ router.post('/api/v1/tasks', async (ctx, next) => {
 
   if('' === new_title){
     //title is empty
-    ctx.response.status = 400;
+    ctx.response.status = HttpStatus.BAD_REQUEST;
     ctx.response.body = '{"code":"task:title_is_empty","msg":"title must be not empty"}';
   }else{
-    //简单实现，可能重复
     var new_id = todolist.tasks.length +1;
     var task = {
       id: todolist.tasks.length +1,
@@ -85,10 +86,46 @@ router.post('/api/v1/tasks', async (ctx, next) => {
       done: false
     };
     todolist.tasks.push(task);
-    ctx.response.status = 201;
+    ctx.response.status = HttpStatus.CREATED;
     ctx.response.body = task;
   }
 });
+
+//put tasks/task_id (modify a task)
+router.put('/api/v1/tasks/:task_id', async (ctx, next) => {
+    var task_id = ctx.params.task_id;
+    var body = '{"code":"task:task_not found","msg":"task not found"}';
+    var status = HttpStatus.BAD_REQUEST;
+
+    ctx.response.type = 'application/json';
+    for(var i in todolist.tasks){
+        if(task_id === todolist.tasks[i].id.toString()){
+            todolist.tasks[i].title = ctx.request.body.title;
+            todolist.tasks[i].done = ctx.request.body.done;
+            status = HttpStatus.ACCEPTED;
+            body = todolist.tasks[i];
+            break;           
+        }
+    }
+    ctx.response.body = body; 
+    ctx.response.status = status;  
+});
+
+//delete /task/task_id 
+router.delete('/api/v1/tasks/:task_id', async (ctx, next) => {
+  var task_id = ctx.params.task_id; 
+
+  ctx.response.type = 'application/json';
+  for(var i in todolist.tasks){
+      if(task_id === todolist.tasks[i].id.toString()){
+          ctx.response.status = HttpStatus.OK;
+          ctx.response.body = todolist.tasks.splice(i,1)[0];
+          return;           
+      }
+  }
+  ctx.response.status = HttpStatus.NO_CONTENT;
+});
+
 
 //在router之前引入bodyPaeser
 app.use(bodyParser());
