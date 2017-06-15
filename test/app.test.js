@@ -7,8 +7,8 @@ const HttpStatus = require('../utils/httpStatusCode');
 
 const TEST_PORT = 8000;
 
-var todolist = require('../todo_list');
-var tasks = todolist.tasks;
+const todolist = require('../todo_list');
+const tasks = todolist.tasks;
 
 
 describe('RESTful API', () => {
