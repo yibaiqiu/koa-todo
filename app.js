@@ -9,28 +9,7 @@ const HttpStatus = require('./utils/httpStatusCode');
 const app = new Koa();
 const router = new Router();
 
-const PORT = 3000;
-
-//采用列表模拟数据库
-var todolist = {
-    tasks: [
-      {
-        id: 1,
-        title: "learn koa",
-        done: false
-      },
-      {
-        id: 2,
-        title: "design project",
-        done: false
-      },
-      {
-        id: 3,
-        title: "todo project",
-        done: false
-      }
-    ]
-};
+var todolist = require('./todo_list');
 
 //log middleware
 app.use(async (ctx, next) => {
@@ -46,17 +25,18 @@ router.get('/', async (ctx, next) => {
 //get tasks router
 router.get('/api/v1/tasks', async (ctx, next) => {
   ctx.response.type = 'application/json';
+  ctx.response.status = HttpStatus.OK;
   ctx.response.body = todolist;
 });
 
 //get tasks/task_id router
 router.get('/api/v1/tasks/:task_id', async (ctx, next) => {
     var task_id = ctx.params.task_id;
-    var result = '{"code":"task:task_not found","msg":"task not found"}';
+    var result = '{"code":"task:task_not_found","msg":"task not found"}';
     var status = HttpStatus.BAD_REQUEST;
 
     ctx.response.type = 'application/json';
-    for(var i in todolist.tasks){
+    for(let i in todolist.tasks){
         if(task_id === todolist.tasks[i].id.toString()){
             result = todolist.tasks[i];
             status = HttpStatus.OK;
@@ -70,7 +50,6 @@ router.get('/api/v1/tasks/:task_id', async (ctx, next) => {
 //post tasks (add new task)
 router.post('/api/v1/tasks', async (ctx, next) => {
   var new_title = ctx.request.body.title || '';
-  console.log(`Add new task: title=${new_title}`);
 
   ctx.response.type = 'application/json';
 
@@ -94,7 +73,7 @@ router.post('/api/v1/tasks', async (ctx, next) => {
 //put tasks/task_id (modify a task)
 router.put('/api/v1/tasks/:task_id', async (ctx, next) => {
     var task_id = ctx.params.task_id;
-    var body = '{"code":"task:task_not found","msg":"task not found"}';
+    var body = '{"code":"task:task_not_found","msg":"task not found"}';
     var status = HttpStatus.BAD_REQUEST;
 
     ctx.response.type = 'application/json';
@@ -126,12 +105,16 @@ router.delete('/api/v1/tasks/:task_id', async (ctx, next) => {
   ctx.response.status = HttpStatus.NO_CONTENT;
 });
 
+// delete /tasks
+router.delete('/api/v1/task', async (ctx, next) => {
+  todolist.tasks.splice(0, todolist.tasks.length);
+  ctx.response.status = HttpStatus.OK;
+});
+
 
 //在router之前引入bodyPaeser
 app.use(bodyParser());
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-app.listen(PORT);
-
-console.log(`App started at port ${PORT}...`);
+module.exports = app;
