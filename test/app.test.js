@@ -1,19 +1,15 @@
 'use strict';
 
-const request = require('supertest');
 const expect = require('chai').expect;
 const app = require('../app');
+const request = require('supertest').agent(app.listen());
+
 const HttpStatus = require('../utils/httpStatusCode');
-
-const TEST_PORT = 8000;
-
 const todolist = require('../todo_list');
 const tasks = todolist.tasks;
 
 
 describe('RESTful API', () => {
-    let server = app.listen(TEST_PORT);
-
     describe('#API tasks', () => {
 
         beforeEach(() => {
@@ -27,7 +23,7 @@ describe('RESTful API', () => {
         });
 
         it('GET /tasks OK', async () => {
-            let result = await request(server)
+            let result = await request
                     .get('/api/v1/tasks')
                     .set('Accept', 'application/json')
                     .expect('Content-Type', /application\/json/)
@@ -41,7 +37,7 @@ describe('RESTful API', () => {
         });
 
         it('GET /tasks/task_id OK', async () => {
-            let result = await request(server)
+            let result = await request
                     .get('/api/v1/tasks/1')
                     .set('Accept', 'application/json')
                     .expect('Content-Type', /application\/json/)
@@ -54,7 +50,7 @@ describe('RESTful API', () => {
         });        
 
         it('GET /tasks/task_id id not exist', async () => {
-            let result = await request(server)
+            let result = await request
                     .get('/api/v1/tasks/5')
                     .set('Accept', 'application/json')
                     .expect('Content-Type', /application\/json/)
@@ -66,7 +62,7 @@ describe('RESTful API', () => {
         });
 
         it('POST /tasks OK', async () => {
-            let result = await request(server)
+            let result = await request
                     .post('/api/v1/tasks')
                     .send({title: 'master javascript'})
                     .set('Accept', 'application/json')
@@ -80,7 +76,7 @@ describe('RESTful API', () => {
         });
 
         it('POST /tasks title is empty', async () => {
-            let result = await request(server)
+            let result = await request
                     .post('/api/v1/tasks')
                     .send({title: ''})
                     .set('Accept', 'application/json')
@@ -93,7 +89,7 @@ describe('RESTful API', () => {
         });
 
         it('PUT /tasks/task_id OK', async () => {
-            let result = await request(server)
+            let result = await request
                     .put('/api/v1/tasks/1')
                     .send({title: 'learn koa2', done: true})
                     .set('Accept', 'application/json')
@@ -107,7 +103,7 @@ describe('RESTful API', () => {
         });
 
         it('PUT /tasks/task_id id not exist', async () => {
-            let result = await request(server)
+            let result = await request
                     .put('/api/v1/tasks/5')
                     .send({title: 'learn koa2', done: true})
                     .set('Accept', 'application/json')
@@ -120,7 +116,7 @@ describe('RESTful API', () => {
         }); 
 
         it('DELETE /tasks/task_id OK', async () => {
-            let result = await request(server)
+            let result = await request
                     .del('/api/v1/tasks/1')
                     .expect('Content-Type', /application\/json/)
                     .expect(HttpStatus.OK)
@@ -132,7 +128,7 @@ describe('RESTful API', () => {
         });
 
         it('DELETE /tasks/task_id not exist', async () => {
-            let result = await request(server)
+            let result = await request
                     .del('/api/v1/tasks/5')
                     .expect(HttpStatus.NO_CONTENT);
         });                                                     
