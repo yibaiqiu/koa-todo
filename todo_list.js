@@ -5,7 +5,7 @@ var todolist = {
     tasks: [
       {
         id: 1,
-        title: "make money",
+        title: "good luck",
         done: false
       },
       {
